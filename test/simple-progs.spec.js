@@ -24,5 +24,6 @@ describe('simple progs', () => {
                           `);
     expect(result).toBe(10);
   });
+
 });
 

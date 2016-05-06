@@ -20,6 +20,7 @@
 '='                             return '='
 '`'                             return '`'
 'def'                           return 'def'
+'defmacro'                      return 'defmacro'
 'list'                          return 'list'
 'if'                            return 'if'
 'let'                           return 'let'
@@ -38,6 +39,8 @@
 'reduce'                        return 'reduce'
 'each'                          return 'each'
 'require'                       return 'require'
+'first'                         return 'first'
+'rest'                          return 'rest'
 \s+                             return 'space'
 \"[^\"\n]*\"                    return 'string'
 \;[^\n]*&                       return 'comment'
@@ -89,6 +92,10 @@ standard_functions
     { $$ = translator.reduce }
   | each
     { $$ = translator.each }
+  | first
+    { $$ = translator.first }
+  | rest
+    { $$ = translator.rest }
   ;
 
 value
@@ -153,12 +160,18 @@ define_statement
     { $$ = { expr: $4, type: 'function', values: $6 }; }
   ;
 
+def_macro_statement
+  :'(' defmacro space expr space values')'
+    { $$ = {expr: $4, type: 'macro', values: $6}; }
+  ;
+
 statement
   : define_statement
   | let_statement
   | if_statement
   | set_statement
   | while_statement
+  | def_macro_statement
   ;
 
 id

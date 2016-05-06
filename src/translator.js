@@ -1,6 +1,9 @@
 'use strict';
 const runtime = `
 'use strict';
+
+const trans = require('./translator.js');
+
 function compare(arr, pred){
   var res = true;
   for(var i = 0; i < arr.length; i++){
@@ -31,7 +34,6 @@ var result = [];
   }
   return result;
 }
-
 `;
 
 const add = `(function(){
@@ -127,6 +129,24 @@ const each = `
   }
 })`;
 
+const first = `
+(function(array){
+  if(Array.isArray(array)){
+    return array[0];
+  }else{
+    throw new Error(array + ' is not an array');
+  }
+})`;
+
+const rest = `
+(function(array){
+  if(Array.isArray(array)){
+    return array.slice(1);
+  }else{
+    throw new Error(array + ' is not an array');
+  }
+})`;
+
 const _parseIf = def => {
   if (def.false) {
     return `(function(){
@@ -210,11 +230,30 @@ const _parsePrintState = def => {
   return `console.log(${parse(def.value)})`;
 }
 
+const DestructArray = array => {
+  return '(' + array.map(v => {
+    if(Array.isArray(v)){
+      return _DestructArray(v);
+    }else{
+      return v;
+    }
+  }).join(' ') + ')';
+}
+
+const _parseMacroDef = def => {
+    return `function ${def.expr.id}(${def.expr.values}){ 
+            let prsed = (function(${def.expr.values}){
+                    return eval(${parse(def.values)}}))(${def.expr.values});
+            return eval(trans.runtime + trans.parse(trans.DestructArray(prsed)))};`;
+}
+
 const _parseTypedExpression = def => {
   if (def.type === 'var') {
     return `let ${def.expr} = ${parse(def.values[0])};`
   } else if (def.type === 'function') {
     return `function ${def.expr.id}(${def.expr.values}){ return ${parse(def.values[0])} };`;
+  } else if (def.type === 'macro') {
+    return _parseMacroDef(def);
   } else if (def.type === 'let') {
     return _parseLetDefinitions(def);
   } else if (def.type === 'if') {
@@ -290,6 +329,9 @@ module.exports = {
   map,
   filter,
   reduce,
-  each
+  each,
+  first,
+  rest,
+  DestructArray
 }
 

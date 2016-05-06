@@ -68,5 +68,25 @@ describe('standard functions', () => {
       expect(result).toEqual(10);
     });
   });
+
+  describe('first', () =>{
+    it('Should return the first element of the array', () => {
+      const result = i.exec(`
+                      (def a \`(1 2 3 4 5))
+                      (first a)
+                      `);
+      expect(result).toEqual(1);
+    });
+  });
+
+  describe('rest', () =>{
+    it('Should all but the first element of the array', () => {
+      const result = i.exec(`
+                      (def a \`(1 2 3 4 5))
+                      (rest a)
+                      `);
+      expect(result).toEqual([2, 3, 4, 5]);
+    });
+  });
 });
 
